@@ -1,0 +1,21 @@
+‎{
+‎  "name": "HNB Digital Banking",
+‎  "short_name": "HNB Digital Banking",
+‎  "description": "application to view your account balance and transaction.",
+‎  "start_url": "https://hasnisubhan.github.io/hnb-app/",
+‎  "display": "standalone",
+‎  "background_color": "#ffffff",
+‎  "theme_color": "#000000",
+‎  "icons": [
+‎    {
+‎      "src": "images/icon-192.png",
+‎      "sizes": "192x192",
+‎      "type": "image/png"
+‎    },
+‎    {
+‎      "src": "images/icon-512.png",
+‎      "sizes": "512x512",
+‎      "type": "image/png"
+‎    }
+‎  ]
+‎}
